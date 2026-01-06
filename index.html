@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="true">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Приключения Малыша">
+    <meta name="theme-color" content="#FF69B4">
+    <meta name="description" content="Развивающая игра для детей 2-3 лет с 6 мини-играми">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%23FF69B4' width='192' height='192' rx='45'/%3E%3Ctext x='96' y='140' font-size='120' text-anchor='middle'%3E🎮%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%23FF69B4' width='192' height='192' rx='45'/%3E%3Ctext x='96' y='140' font-size='120' text-anchor='middle'%3E🎮%3C/text%3E%3C/svg%3E">
+    <title>🎮 Приключения Малыша</title>
+    <style>
+        :root {
+            --color-primary: #FF69B4;
+            --color-secondary: #FFB6C1;
+            --color-success: #32B8C6;
+            --color-warning: #FFA500;
+            --color-error: #FF4456;
+            --color-bg: #FFF5F7;
+            --color-surface: #FFFFFF;
+            --color-text: #2C3E50;
+            --color-text-light: #7F8C8D;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFE4E1 100%);
+            color: var(--color-text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFE4E1 100%);
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(15px, 5vw, 30px);
+            animation: fadeIn 0.3s ease-in;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            z-index: 10;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        #menu-screen {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFE4E1 100%);
+        }
+
+        .menu-title {
+            font-size: clamp(32px, 10vw, 52px);
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .menu-subtitle {
+            font-size: clamp(14px, 4vw, 18px);
+            color: var(--color-text-light);
+            margin-bottom: clamp(25px, 8vw, 45px);
+            text-align: center;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+            gap: clamp(10px, 3vw, 15px);
+            max-width: 420px;
+            width: 100%;
+            margin-bottom: clamp(20px, 6vw, 35px);
+        }
+
+        .character-btn {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            border: 3px solid transparent;
+            background: var(--color-surface);
+            font-size: clamp(36px, 10vw, 52px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(255, 107, 148, 0.2);
+            -webkit-tap-highlight-color: transparent;
+            min-height: 75px;
+        }
+
+        .character-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 8px rgba(255, 107, 148, 0.3);
+        }
+
+        .character-btn.selected {
+            border-color: var(--color-primary);
+            background: var(--color-secondary);
+            transform: scale(1.12);
+            box-shadow: 0 6px 20px rgba(255, 107, 148, 0.4);
+        }
+
+        #games-screen {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFE4E1 100%);
+            padding-top: clamp(60px, 10vh, 90px);
+        }
+
+        .header-top {
+            position: absolute;
+            top: clamp(10px, 3vh, 20px);
+            left: clamp(10px, 3vw, 20px);
+            right: clamp(10px, 3vw, 20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .btn-small {
+            width: clamp(40px, 10vw, 50px);
+            height: clamp(40px, 10vw, 50px);
+            border: none;
+            border-radius: 50%;
+            background: var(--color-surface);
+            font-size: clamp(18px, 5vw, 24px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-small:active {
+            transform: scale(0.88);
+        }
+
+        .games-title {
+            font-size: clamp(22px, 6vw, 32px);
+            margin-bottom: clamp(15px, 4vw, 25px);
+            text-align: center;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: clamp(12px, 3vw, 18px);
+            width: 100%;
+            max-width: 480px;
+            padding-bottom: 20px;
+            overflow-y: auto;
+            max-height: calc(100dvh - 140px);
+        }
+
+        .game-card {
+            aspect-ratio: 1;
+            background: var(--color-surface);
+            border-radius: 15px;
+            padding: clamp(12px, 3vw, 18px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(6px, 2vw, 10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            -webkit-tap-highlight-color: transparent;
+            min-height: 110px;
+        }
+
+        .game-card:active {
+            transform: scale(0.93);
+        }
+
+        .game-icon {
+            font-size: clamp(32px, 8vw, 44px);
+        }
+
+        .game-name {
+            font-size: clamp(11px, 2.5vw, 13px);
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .game-level {
+            font-size: clamp(9px, 2vw, 11px);
+            color: var(--color-text-light);
+        }
+
+        #game-screen {
+            background: linear-gradient(135deg, #E0BBE4 0%, #FFDFD3 100%);
+            justify-content: flex-start;
+            padding-top: clamp(60px, 10vh, 90px);
+        }
+
+        .game-header {
+            position: absolute;
+            top: clamp(10px, 3vh, 20px);
+            left: clamp(10px, 3vw, 20px);
+            right: clamp(10px, 3vw, 20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .game-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(8px, 2vw, 12px);
+            margin-bottom: clamp(15px, 4vw, 25px);
+            margin-top: clamp(5px, 2vw, 10px);
+        }
+
+        .game-name-big {
+            font-size: clamp(20px, 5vw, 30px);
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: clamp(150px, 60vw, 250px);
+            height: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid var(--color-primary);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #32B8C6, #50C878);
+            transition: width 0.3s ease;
+        }
+
+        .game-content {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(15px, 3vw, 25px);
+            gap: clamp(15px, 4vw, 25px);
+            overflow: hidden;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: clamp(10px, 2vw, 15px);
+            max-width: 350px;
+            width: 100%;
+        }
+
+        .card {
+            aspect-ratio: 1;
+            background: var(--color-surface);
+            border: 3px solid var(--color-primary);
+            border-radius: 12px;
+            font-size: clamp(28px, 8vw, 48px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 60px;
+        }
+
+        .card:active {
+            transform: scale(0.92);
+        }
+
+        .card.matched {
+            background: #D4EDDA;
+            border-color: var(--color-success);
+            opacity: 0.7;
+        }
+
+        .card.hidden {
+            background: var(--color-secondary);
+            color: transparent;
+        }
+
+        #snake-game-canvas {
+            display: block;
+            background: white;
+            border: 3px solid var(--color-primary);
+            border-radius: 12px;
+            max-width: 100%;
+            width: 300px;
+            height: 300px;
+            touch-action: none;
+            -webkit-user-select: none;
+        }
+
+        .pattern-display {
+            display: flex;
+            gap: clamp(10px, 3vw, 18px);
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 350px;
+            padding: clamp(15px, 3vw, 20px);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            margin-bottom: clamp(15px, 4vw, 25px);
+        }
+
+        .pattern-item {
+            width: clamp(50px, 12vw, 70px);
+            height: clamp(50px, 12vw, 70px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(28px, 8vw, 42px);
+            border: 2px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(12px, 3vw, 18px);
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .pattern-btn {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            border: 3px solid #DDD;
+            background: white;
+            font-size: clamp(32px, 8vw, 48px);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            -webkit-tap-highlight-color: transparent;
+            min-height: 80px;
+        }
+
+        .pattern-btn:active {
+            transform: scale(0.92);
+        }
+
+        .pattern-btn.selected {
+            border-color: var(--color-primary);
+            background: var(--color-secondary);
+            transform: scale(1.08);
+        }
+
+        .hiding-game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(15px, 4vw, 25px);
+            width: 100%;
+        }
+
+        .hiding-target {
+            font-size: clamp(48px, 14vw, 80px);
+            padding: clamp(15px, 4vw, 25px);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            border: 3px dashed var(--color-primary);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hiding-label {
+            font-size: clamp(12px, 3vw, 15px);
+            color: var(--color-text-light);
+            text-align: center;
+        }
+
+        .hiding-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: clamp(12px, 3vw, 18px);
+            max-width: 350px;
+            width: 100%;
+        }
+
+        .hiding-box {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 12px;
+            border: 3px solid #CC8800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(28px, 8vw, 44px);
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
+            min-height: 80px;
+        }
+
+        .hiding-box:active {
+            transform: scale(0.92);
+        }
+
+        .hiding-box.revealed {
+            background: linear-gradient(135deg, #C1FF72 0%, #50C878 100%);
+            border-color: var(--color-success);
+        }
+
+        .colors-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(12px, 3vw, 18px);
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .color-btn {
+            aspect-ratio: 1;
+            border-radius: 20px;
+            border: 3px solid #DDD;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            -webkit-tap-highlight-color: transparent;
+            min-height: 80px;
+            position: relative;
+        }
+
+        .color-btn:active {
+            transform: scale(0.92);
+        }
+
+        .color-btn.selected {
+            border-color: #000;
+            transform: scale(1.08);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-buttons {
+            display: flex;
+            gap: clamp(10px, 2vw, 15px);
+            width: 100%;
+            max-width: 400px;
+            padding-bottom: clamp(15px, 4vw, 25px);
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: clamp(12px, 2vw, 16px) clamp(16px, 3vw, 24px);
+            border: none;
+            border-radius: 12px;
+            font-size: clamp(13px, 3vw, 16px);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), #FF85A2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 148, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 8px rgba(255, 107, 148, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 2px solid var(--color-primary);
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.92);
+        }
+
+        #success-screen {
+            background: linear-gradient(135deg, #FFE4E1 0%, #FFD700 100%);
+        }
+
+        .success-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(15px, 4vw, 25px);
+        }
+
+        .success-emoji {
+            font-size: clamp(60px, 20vw, 120px);
+            animation: bounce 0.8s infinite;
+        }
+
+        .success-text {
+            font-size: clamp(24px, 6vw, 36px);
+            font-weight: bold;
+            text-align: center;
+            color: var(--color-text);
+        }
+
+        .stars-container {
+            display: flex;
+            gap: clamp(12px, 3vw, 18px);
+            justify-content: center;
+            font-size: clamp(32px, 8vw, 48px);
+        }
+
+        .star {
+            opacity: 0;
+            animation: popIn 0.5s ease forwards;
+        }
+
+        .star:nth-child(1) { animation-delay: 0.2s; }
+        .star:nth-child(2) { animation-delay: 0.4s; }
+        .star:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        .success-buttons {
+            display: flex;
+            gap: clamp(10px, 2vw, 15px);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        #settings-screen {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFE4E1 100%);
+            padding-top: clamp(60px, 10vh, 90px);
+        }
+
+        .settings-content {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(15px, 4vw, 25px);
+            width: 100%;
+            max-width: 350px;
+            max-height: calc(100dvh - 120px);
+            overflow-y: auto;
+            padding-bottom: clamp(15px, 4vw, 25px);
+        }
+
+        .settings-title {
+            font-size: clamp(26px, 6vw, 32px);
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .setting-group {
+            background: var(--color-surface);
+            padding: clamp(12px, 3vw, 18px);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .setting-label {
+            font-size: clamp(13px, 3vw, 15px);
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+            color: var(--color-text);
+        }
+
+        .toggle-switch {
+            width: 60px;
+            height: 32px;
+            background: #CCC;
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.on {
+            background: var(--color-success);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 28px;
+            height: 28px;
+            background: white;
+            border-radius: 50%;
+            transition: left 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.on .toggle-slider {
+            left: 30px;
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #DDD;
+            border-radius: 3px;
+            outline: none;
+            margin-top: 8px;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--color-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        @media (max-width: 600px) {
+            .character-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cards-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .game-buttons {
+                flex-direction: column;
+            }
+
+            #snake-game-canvas {
+                width: 250px;
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .character-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            #snake-game-canvas {
+                width: 220px;
+                height: 220px;
+            }
+        }
+
+        @media (orientation: landscape) {
+            .container {
+                max-height: 100dvh;
+            }
+
+            .character-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .games-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            #games-screen {
+                padding-top: 50px;
+            }
+
+            #game-screen {
+                padding-top: 50px;
+            }
+        }
+
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+
+            .screen {
+                padding-left: max(15px, env(safe-area-inset-left));
+                padding-right: max(15px, env(safe-area-inset-right));
+                padding-bottom: max(15px, env(safe-area-inset-bottom));
+            }
+        }
+
+        .pwa-install-prompt {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            text-align: center;
+        }
+
+        .pwa-install-prompt.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(150px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media print {
+            body, .container { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ГЛАВНОЕ МЕНЮ -->
+        <div class="screen active" id="menu-screen">
+            <div class="menu-title">🎮 Приключения Малыша</div>
+            <div class="menu-subtitle">Выбери персонажа и начни играть!</div>
+            
+            <div class="character-grid" id="characterGrid">
+                <button class="character-btn" data-character="👧" title="Мила">👧</button>
+                <button class="character-btn" data-character="🐻" title="Потап">🐻</button>
+                <button class="character-btn" data-character="🚜" title="Тоша">🚜</button>
+                <button class="character-btn" data-character="🚗" title="Лёша">🚗</button>
+                <button class="character-btn" data-character="👾" title="Бум">👾</button>
+                <button class="character-btn" data-character="🎉" title="Сюрприз">🎉</button>
+            </div>
+
+            <button class="btn-action btn-primary" id="startBtn">▶ Начать Игру</button>
+        </div>
+
+        <!-- ЭКРАН ВЫБОРА ИГР -->
+        <div class="screen" id="games-screen">
+            <div class="header-top">
+                <button class="btn-small" id="backBtn">←</button>
+                <button class="btn-small" id="settingsBtn">⚙️</button>
+            </div>
+
+            <div class="games-title">Выбери игру:</div>
+            
+            <div class="games-grid" id="gamesGrid">
+                <div class="game-card" data-game="memory">
+                    <div class="game-icon">🎴</div>
+                    <div class="game-name">Найди Пару</div>
+                    <div class="game-level" id="memory-level">Уровень 1</div>
+                </div>
+                <div class="game-card" data-game="missing">
+                    <div class="game-icon">🔍</div>
+                    <div class="game-name">Что Пропало?</div>
+                    <div class="game-level" id="missing-level">Уровень 1</div>
+                </div>
+                <div class="game-card" data-game="snake">
+                    <div class="game-icon">🐍</div>
+                    <div class="game-name">Змейка</div>
+                    <div class="game-level" id="snake-level">Уровень 1</div>
+                </div>
+                <div class="game-card" data-game="hidden">
+                    <div class="game-icon">🎁</div>
+                    <div class="game-name">Открой Коробку</div>
+                    <div class="game-level" id="hidden-level">Уровень 1</div>
+                </div>
+                <div class="game-card" data-game="pattern">
+                    <div class="game-icon">🌈</div>
+                    <div class="game-name">Радуга Фигур</div>
+                    <div class="game-level" id="pattern-level">Уровень 1</div>
+                </div>
+                <div class="game-card" data-game="colors">
+                    <div class="game-icon">🎨</div>
+                    <div class="game-name">Подбери Цвет</div>
+                    <div class="game-level" id="colors-level">Уровень 1</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ИГРОВОЙ ЭКРАН -->
+        <div class="screen" id="game-screen">
+            <div class="game-header">
+                <button class="btn-small" id="exitBtn">←</button>
+                <span id="characterDisplay" style="font-size: clamp(20px, 6vw, 28px);">👧</span>
+                <button class="btn-small" id="soundBtn">🔊</button>
+            </div>
+
+            <div class="game-info">
+                <div class="game-name-big" id="gameName">Найди Пару</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="game-content" id="gameContent"></div>
+
+            <div class="game-buttons">
+                <button class="btn-action btn-secondary" id="retryBtn">🔄 Заново</button>
+                <button class="btn-action btn-primary" id="nextBtn">Далее ➜</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН УСПЕХА -->
+        <div class="screen" id="success-screen">
+            <div class="success-container">
+                <div class="success-emoji">🎉</div>
+                <div class="success-text" id="successText">Отлично!</div>
+                <div class="stars-container" id="starsContainer">
+                    <span class="star">⭐</span>
+                    <span class="star">⭐</span>
+                    <span class="star">⭐</span>
+                </div>
+                <div class="success-buttons">
+                    <button class="btn-action btn-secondary" id="backToMenuBtn">← Меню</button>
+                    <button class="btn-action btn-primary" id="continueBtn">Далее ➜</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН НАСТРОЕК -->
+        <div class="screen" id="settings-screen">
+            <div class="header-top">
+                <button class="btn-small" id="closeSettingsBtn">←</button>
+            </div>
+
+            <div class="settings-content">
+                <div class="settings-title">⚙️ Настройки</div>
+
+                <div class="setting-group">
+                    <label class="setting-label">🔊 Звук</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="soundToggle" checked>
+                        <label for="soundToggle" style="margin: 0; cursor: pointer; font-size: 14px;">Включить звук</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">🔉 Громкость</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="70" class="volume-slider">
+                    <div style="text-align: center; margin-top: 8px; font-size: 12px;" id="volumeValue">70%</div>
+                </div>
+
+                <div class="setting-group">
+                    <label class="setting-label">👶 Персонаж</label>
+                    <div class="character-grid" id="settingsCharacterGrid">
+                        <button class="character-btn" data-character="👧">👧</button>
+                        <button class="character-btn" data-character="🐻">🐻</button>
+                        <button class="character-btn" data-character="🚜">🚜</button>
+                        <button class="character-btn" data-character="🚗">🚗</button>
+                        <button class="character-btn" data-character="👾">👾</button>
+                        <button class="character-btn" data-character="🎉">🎉</button>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <button class="btn-action btn-secondary" id="resetProgressBtn" style="width: 100%;">🔄 Сброс прогресса</button>
+                </div>
+
+                <div class="setting-group">
+                    <button class="btn-action btn-secondary" id="installPwaBtn" style="width: 100%; display: none;">📱 Установить приложение</button>
+                </div>
+
+                <div class="setting-group">
+                    <p style="font-size: 11px; color: var(--color-text-light); margin: 0; line-height: 1.4;">
+                        <strong>Приключения Малыша v2.0</strong><br>
+                        Развивающая игра для детей 2-3 лет<br>
+                        © 2026 Все права защищены<br>
+                        PWA для GitHub Pages
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== СИСТЕМА СОСТОЯНИЯ ====================
+        const gameState = {
+            character: '👧',
+            currentGame: null,
+            currentLevel: 1,
+            soundEnabled: true,
+            volume: 70,
+            progress: {},
+            achievements: []
+        };
+
+        // ==================== ЗАГРУЗКА И СОХРАНЕНИЕ ====================
+        function saveState() {
+            localStorage.setItem('babyGameState', JSON.stringify(gameState));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('babyGameState');
+            if (saved) {
+                Object.assign(gameState, JSON.parse(saved));
+            }
+            updateUI();
+        }
+
+        // ==================== НАВИГАЦИЯ ====================
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // ==================== ЗВУКИ ====================
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, duration = 200, type = 'sine') {
+            if (!gameState.soundEnabled) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = type;
+            oscillator.frequency.value = frequency;
+
+            gainNode.gain.setValueAtTime(gameState.volume / 100, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function playSuccessSound() {
+            playSound(800, 150);
+            setTimeout(() => playSound(1200, 150), 160);
+        }
+
+        function playErrorSound() {
+            playSound(300, 100);
+            setTimeout(() => playSound(250, 100), 110);
+        }
+
+        function playClickSound() {
+            playSound(600, 100);
+        }
+
+        // ==================== ГЛАВНОЕ МЕНЮ ====================
+        document.querySelectorAll('.character-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                gameState.character = this.dataset.character;
+                updateUI();
+                playClickSound();
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            saveState();
+            showScreen('games-screen');
+            playClickSound();
+        });
+
+        // ==================== ЭКРАН ВЫБОРА ИГР ====================
+        document.getElementById('backBtn').addEventListener('click', () => {
+            showScreen('menu-screen');
+            playClickSound();
+        });
+
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            showScreen('settings-screen');
+            playClickSound();
+        });
+
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.addEventListener('click', function() {
+                gameState.currentGame = this.dataset.game;
+                gameState.currentLevel = gameState.progress[gameState.currentGame] || 1;
+                startGame(gameState.currentGame, gameState.currentLevel);
+                showScreen('game-screen');
+                playClickSound();
+            });
+        });
+
+        // ==================== ИГРЫ ====================
+        const games = {
+            memory: {
+                name: '🎴 Найди Пару',
+                icon: '🎴',
+                maxLevels: 10,
+                emojis: ['🍎', '🍌', '🍇', '🍓', '🥝', '🍑', '🍊', '🍋'],
+                generate: (level) => {
+                    const count = 2 + Math.floor(level / 2);
+                    const pairs = gameState.character + ' ' + games.memory.emojis[Math.floor(Math.random() * games.memory.emojis.length)];
+                    const items = [];
+                    for (let i = 0; i < count; i++) {
+                        items.push(pairs);
+                    }
+                    items.sort(() => Math.random() - 0.5);
+                    return items;
+                },
+                render: (items) => {
+                    const content = document.getElementById('gameContent');
+                    content.innerHTML = '<div class="cards-grid" id="cardsGrid"></div>';
+                    const grid = document.getElementById('cardsGrid');
+                    
+                    items.forEach((item, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'card hidden';
+                        card.textContent = item;
+                        card.addEventListener('click', () => {
+                            card.classList.toggle('hidden');
+                            playClickSound();
+                        });
+                        grid.appendChild(card);
+                    });
+                }
+            },
+
+            missing: {
+                name: '🔍 Что Пропало?',
+                icon: '🔍',
+                maxLevels: 10,
+                items: ['🍎', '🐕', '🚗', '🌸', '⭐', '🎈', '🦋', '🎁'],
+                generate: (level) => {
+                    const count = 2 + Math.floor(level / 3);
+                    const selected = [];
+                    for (let i = 0; i < count; i++) {
+                        selected.push(games.missing.items[Math.floor(Math.random() * games.missing.items.length)]);
+                    }
+                    return selected;
+                },
+                render: (items) => {
+                    const content = document.getElementById('gameContent');
+                    content.innerHTML = `<div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 350px;">
+                        ${items.map(item => `<div style="font-size: clamp(32px, 8vw, 48px); padding: clamp(10px, 3vw, 15px); background: white; border-radius: 10px; border: 2px solid var(--color-primary);">${item}</div>`).join('')}
+                    </div>
+                    <button class="btn-action btn-secondary" id="showMissingBtn" style="margin-top: 15px;">Показать заново</button>`;
+                    
+                    document.getElementById('showMissingBtn').addEventListener('click', () => {
+                        const hidden = items[Math.floor(Math.random() * items.length)];
+                        const displayDiv = document.querySelector('.game-content > div');
+                        const temp = displayDiv.innerHTML;
+                        displayDiv.innerHTML = `<div style="font-size: clamp(48px, 14vw, 80px); padding: clamp(20px, 5vw, 30px); background: white; border-radius: 15px; border: 3px dashed var(--color-primary); min-height: 120px; display: flex; align-items: center; justify-content: center;">${hidden}</div>`;
+                        setTimeout(() => {
+                            displayDiv.innerHTML = temp;
+                            document.getElementById('showMissingBtn').addEventListener('click', arguments.callee);
+                        }, 1500);
+                        playClickSound();
+                    });
+                }
+            },
+
+            snake: {
+                name: '🐍 Змейка',
+                icon: '🐍',
+                maxLevels: 10,
+                generate: (level) => ({ level }),
+                render: (data) => {
+                    const content = document.getElementById('gameContent');
+                    content.innerHTML = '<canvas id="snake-game-canvas"></canvas>';
+                    startSnakeGame(data.level);
+                }
+            },
+
+            hidden: {
+                name: '🎁 Открой Коробку',
+                icon: '🎁',
+                maxLevels: 10,
+                generate: (level) => {
+                    return Math.floor(Math.random() * (3 + Math.floor(level / 2)));
+                },
+                render: (position) => {
+                    const content = document.getElementById('gameContent');
+                    const count = 3 + Math.floor(gameState.currentLevel / 2);
+                    
+                    content.innerHTML = `
+                        <div class="hiding-game-container">
+                            <div class="hiding-label">Где спрятался ${gameState.character}?</div>
+                            <div class="hiding-target">${gameState.character}</div>
+                            <div class="hiding-grid" id="hidingGrid"></div>
+                        </div>`;
+                    
+                    const grid = document.getElementById('hidingGrid');
+                    for (let i = 0; i < count; i++) {
+                        const box = document.createElement('div');
+                        box.className = 'hiding-box';
+                        box.innerHTML = '🎁';
+                        box.dataset.position = i;
+                        box.addEventListener('click', function() {
+                            this.classList.add('revealed');
+                            this.innerHTML = parseInt(this.dataset.position) === position ? gameState.character : '❌';
+                            playClickSound();
+                            
+                            if (parseInt(this.dataset.position) === position) {
+                                setTimeout(() => {
+                                    playSuccessSound();
+                                    completeLevel();
+                                }, 500);
+                            } else {
+                                setTimeout(() => {
+                                    playErrorSound();
+                                    this.classList.remove('revealed');
+                                    this.innerHTML = '🎁';
+                                }, 800);
+                            }
+                        });
+                        grid.appendChild(box);
+                    }
+                }
+            },
+
+            pattern: {
+                name: '🌈 Радуга Фигур',
+                icon: '🌈',
+                maxLevels: 10,
+                shapes: ['🔴', '🟡', '🔵', '🟢', '🟣', '🟠'],
+                generate: (level) => {
+                    const count = 2 + Math.floor(level / 2);
+                    const pattern = [];
+                    for (let i = 0; i < count; i++) {
+                        pattern.push(games.pattern.shapes[Math.floor(Math.random() * games.pattern.shapes.length)]);
+                    }
+                    return pattern;
+                },
+                render: (pattern) => {
+                    const content = document.getElementById('gameContent');
+                    let selected = [];
+                    
+                    content.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%;">
+                            <div style="font-size: 13px; color: var(--color-text-light); text-align: center;">Повтори узор:</div>
+                            <div class="pattern-display" id="patternDisplay">
+                                ${pattern.map(p => `<div class="pattern-item">${p}</div>`).join('')}
+                            </div>
+                            <div style="font-size: 13px; color: var(--color-text-light);">Выбери фигуры:</div>
+                            <div class="pattern-grid" id="patternGrid">
+                                ${games.pattern.shapes.map(shape => `<div class="pattern-btn" data-shape="${shape}">${shape}</div>`).join('')}
+                            </div>
+                        </div>`;
+                    
+                    document.querySelectorAll('#patternGrid .pattern-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            this.classList.toggle('selected');
+                            selected = Array.from(document.querySelectorAll('#patternGrid .pattern-btn.selected')).map(b => b.dataset.shape);
+                            
+                            if (selected.length === pattern.length && selected.every((s, i) => s === pattern[i])) {
+                                playSuccessSound();
+                                setTimeout(() => completeLevel(), 300);
+                            }
+                            playClickSound();
+                        });
+                    });
+                }
+            },
+
+            colors: {
+                name: '🎨 Подбери Цвет',
+                icon: '🎨',
+                maxLevels: 10,
+                colorMap: {
+                    '🔴': '#FF4456',
+                    '🟡': '#FFA500',
+                    '🔵': '#32B8C6',
+                    '🟢': '#50C878',
+                    '🟣': '#9B59B6',
+                    '🟠': '#FF8C42'
+                },
+                colors: ['🔴', '🟡', '🔵', '🟢', '🟣', '🟠'],
+                generate: (level) => {
+                    return games.colors.colors[Math.floor(Math.random() * games.colors.colors.length)];
+                },
+                render: (target) => {
+                    const content = document.getElementById('gameContent');
+                    content.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 25px; width: 100%;">
+                            <div style="font-size: 13px; color: var(--color-text-light);">Найди такой же цвет:</div>
+                            <div style="font-size: clamp(48px, 14vw, 80px); padding: clamp(15px, 4vw, 25px); background: white; border-radius: 15px; border: 3px solid var(--color-primary);">${target}</div>
+                            <div class="colors-grid" id="colorsGrid"></div>
+                        </div>`;
+                    
+                    const grid = document.getElementById('colorsGrid');
+                    games.colors.colors.forEach(color => {
+                        const btn = document.createElement('div');
+                        btn.className = 'color-btn';
+                        btn.style.background = games.colors.colorMap[color];
+                        btn.style.cursor = 'pointer';
+                        btn.addEventListener('click', () => {
+                            if (color === target) {
+                                playSuccessSound();
+                                completeLevel();
+                            } else {
+                                playErrorSound();
+                            }
+                            playClickSound();
+                        });
+                        grid.appendChild(btn);
+                    });
+                }
+            }
+        };
+
+        // ==================== ИГРА ЗМЕЙКА ====================
+        let snakeGame = null;
+
+        function startSnakeGame(level) {
+            const canvas = document.getElementById('snake-game-canvas');
+            const ctx = canvas.getContext('2d');
+            const gridSize = 20;
+            const canvasSize = 300;
+            const tileCount = canvasSize / gridSize;
+
+            let snake = [{ x: 5, y: 5 }];
+            let direction = { x: 1, y: 0 };
+            let nextDirection = { x: 1, y: 0 };
+            let food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+            let score = 0;
+            let targetScore = 3 + level;
+            let gameActive = true;
+
+            const baseSpeed = Math.max(50, 150 - level * 10);
+
+            function drawGame() {
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+                ctx.fillStyle = '#FF69B4';
+                snake.forEach(segment => {
+                    ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
+                });
+
+                ctx.fillStyle = '#FFA500';
+                ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
+
+                ctx.strokeStyle = '#DDD';
+                ctx.lineWidth = 0.5;
+                for (let i = 0; i <= tileCount; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * gridSize, 0);
+                    ctx.lineTo(i * gridSize, canvasSize);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * gridSize);
+                    ctx.lineTo(canvasSize, i * gridSize);
+                    ctx.stroke();
+                }
+            }
+
+            function update() {
+                if (!gameActive) return;
+
+                direction = nextDirection;
+                const head = snake[0];
+                const newHead = {
+                    x: (head.x + direction.x + tileCount) % tileCount,
+                    y: (head.y + direction.y + tileCount) % tileCount
+                };
+
+                snake.unshift(newHead);
+
+                if (newHead.x === food.x && newHead.y === food.y) {
+                    score++;
+                    food = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+                    playSuccessSound();
+
+                    if (score >= targetScore) {
+                        gameActive = false;
+                        setTimeout(() => completeLevel(), 300);
+                    }
+                } else {
+                    snake.pop();
+                }
+
+                for (let i = 1; i < snake.length; i++) {
+                    if (snake[i].x === newHead.x && snake[i].y === newHead.y) {
+                        gameActive = false;
+                        playErrorSound();
+                    }
+                }
+
+                drawGame();
+            }
+
+            function gameLoop() {
+                update();
+                setTimeout(gameLoop, baseSpeed);
+            }
+
+            function handleKeyPress(e) {
+                const key = e.key;
+                if (key === 'ArrowUp' && direction.y === 0) nextDirection = { x: 0, y: -1 };
+                if (key === 'ArrowDown' && direction.y === 0) nextDirection = { x: 0, y: 1 };
+                if (key === 'ArrowLeft' && direction.x === 0) nextDirection = { x: -1, y: 0 };
+                if (key === 'ArrowRight' && direction.x === 0) nextDirection = { x: 1, y: 0 };
+            }
+
+            function handleTouchStart(e) {
+                if (e.touches.length === 0) return;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+
+                if (x > canvasSize / 2 && direction.x === 0) nextDirection = { x: 1, y: 0 };
+                else if (x < canvasSize / 2 && direction.x === 0) nextDirection = { x: -1, y: 0 };
+                else if (y > canvasSize / 2 && direction.y === 0) nextDirection = { x: 0, y: 1 };
+                else if (y < canvasSize / 2 && direction.y === 0) nextDirection = { x: 0, y: -1 };
+            }
+
+            canvas.addEventListener('keydown', handleKeyPress);
+            canvas.addEventListener('touchstart', handleTouchStart);
+            document.addEventListener('keydown', handleKeyPress);
+
+            drawGame();
+            gameLoop();
+
+            snakeGame = { stop: () => {
+                gameActive = false;
+                canvas.removeEventListener('keydown', handleKeyPress);
+                canvas.removeEventListener('touchstart', handleTouchStart);
+                document.removeEventListener('keydown', handleKeyPress);
+            }};
+        }
+
+        // ==================== ЗАПУСК ИГРЫ ====================
+        function startGame(gameType, level) {
+            const game = games[gameType];
+            const gameData = game.generate(level);
+            
+            document.getElementById('gameName').textContent = game.name;
+            document.getElementById('characterDisplay').textContent = gameState.character;
+            
+            game.render(gameData);
+            
+            const progress = (level / game.maxLevels) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            playClickSound();
+        }
+
+        function completeLevel() {
+            const game = games[gameState.currentGame];
+            gameState.progress[gameState.currentGame] = Math.min(
+                (gameState.progress[gameState.currentGame] || 1) + 1,
+                game.maxLevels
+            );
+            saveState();
+            
+            showScreen('success-screen');
+            playSuccessSound();
+        }
+
+        // ==================== КНОПКИ ИГРЫ ====================
+        document.getElementById('exitBtn').addEventListener('click', () => {
+            if (snakeGame) snakeGame.stop();
+            showScreen('games-screen');
+            playClickSound();
+        });
+
+        document.getElementById('soundBtn').addEventListener('click', () => {
+            gameState.soundEnabled = !gameState.soundEnabled;
+            saveState();
+            playClickSound();
+            document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+        });
+
+        document.getElementById('retryBtn').addEventListener('click', () => {
+            if (snakeGame) snakeGame.stop();
+            startGame(gameState.currentGame, gameState.currentLevel);
+            playClickSound();
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (snakeGame) snakeGame.stop();
+            const game = games[gameState.currentGame];
+            if (gameState.currentLevel < game.maxLevels) {
+                gameState.currentLevel++;
+                startGame(gameState.currentGame, gameState.currentLevel);
+            } else {
+                showScreen('success-screen');
+            }
+            playClickSound();
+        });
+
+        // ==================== ЭКРАН УСПЕХА ====================
+        document.getElementById('backToMenuBtn').addEventListener('click', () => {
+            showScreen('games-screen');
+            playClickSound();
+        });
+
+        document.getElementById('continueBtn').addEventListener('click', () => {
+            const game = games[gameState.currentGame];
+            if (gameState.currentLevel < game.maxLevels) {
+                gameState.currentLevel++;
+                startGame(gameState.currentGame, gameState.currentLevel);
+                showScreen('game-screen');
+            } else {
+                showScreen('games-screen');
+            }
+            playClickSound();
+        });
+
+        // ==================== НАСТРОЙКИ ====================
+        document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+            showScreen('games-screen');
+            playClickSound();
+        });
+
+        document.getElementById('soundToggle').addEventListener('change', function() {
+            gameState.soundEnabled = this.checked;
+            saveState();
+            playClickSound();
+        });
+
+        document.getElementById('volumeSlider').addEventListener('input', function() {
+            gameState.volume = this.value;
+            document.getElementById('volumeValue').textContent = this.value + '%';
+            saveState();
+            playClickSound();
+        });
+
+        document.querySelectorAll('#settingsCharacterGrid .character-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                gameState.character = this.dataset.character;
+                document.querySelectorAll('#settingsCharacterGrid .character-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                saveState();
+                playClickSound();
+            });
+        });
+
+        document.getElementById('resetProgressBtn').addEventListener('click', () => {
+            if (confirm('Сбросить весь прогресс?')) {
+                gameState.progress = {};
+                gameState.currentLevel = 1;
+                saveState();
+                location.reload();
+            }
+        });
+
+        // ==================== PWA УСТАНОВКА ====================
+        let deferredPrompt;
+        const installBtn = document.getElementById('installPwaBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response: ${outcome}`);
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            installBtn.style.display = 'none';
+        });
+
+        // ==================== SERVICE WORKER РЕГИСТРАЦИЯ ====================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                        
+                        // Проверяем обновления каждые 6 часов
+                        setInterval(() => {
+                            registration.update();
+                        }, 6 * 60 * 60 * 1000);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+
+                // Проверяем обновления при загрузке
+                navigator.serviceWorker.ready
+                    .then(registration => {
+                        registration.update();
+                    });
+            });
+
+            // Обновляем страницу при обновлении Service Worker
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('New Service Worker activated');
+                // Можно показать уведомление об обновлении
+            });
+        }
+
+        // ==================== ИНТЕРФЕЙС ====================
+        function updateUI() {
+            document.querySelectorAll('.character-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.character === gameState.character);
+            });
+
+            document.querySelectorAll('#settingsCharacterGrid .character-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.character === gameState.character);
+            });
+
+            Object.keys(games).forEach(gameType => {
+                const level = gameState.progress[gameType] || 1;
+                const elem = document.getElementById(gameType + '-level');
+                if (elem) {
+                    elem.textContent = 'Уровень ' + Math.min(level, games[gameType].maxLevels);
+                }
+            });
+
+            document.getElementById('soundBtn').textContent = gameState.soundEnabled ? '🔊' : '🔇';
+            document.getElementById('soundToggle').checked = gameState.soundEnabled;
+            document.getElementById('volumeSlider').value = gameState.volume;
+            document.getElementById('volumeValue').textContent = gameState.volume + '%';
+        }
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        window.addEventListener('load', () => {
+            loadState();
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+        });
+
+        // ==================== ПРЕДОТВРАЩЕНИЕ СКРОЛЛА ====================
+        document.addEventListener('touchmove', (e) => {
+            if (e.target.tagName !== 'INPUT' && e.target.id !== 'snake-game-canvas') {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
